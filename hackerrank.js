@@ -5,7 +5,9 @@ let email = "ticof80559@youke1.com";
 let password = "abcdef";
 
 let browserLaunchPromise = puppeteer.launch({
-    headless : false
+    headless : false,
+    defaultViewport: null,
+    args: ["--start-maximized"]
 });
 browserLaunchPromise.then(function(browserInstance){
     let newPagePromise = browserInstance.newPage();
@@ -24,10 +26,18 @@ browserLaunchPromise.then(function(browserInstance){
     return passwordTypePromise;
 }).then(function(){
     // press login button
-    let loginBtnClickPromise = cPage.click("button[data-analytics='LoginPassword']")
-    return loginBtnClickPromise;
+    let loginBtnClickPromise = cPage.click("button[data-analytics='LoginPassword']");
+    let waitPromise =  cPage.waitForSelector("a[data-analytics='StartPreparation']");
+    let combPromise = Promise.all([loginBtnClickPromise , cPage.waitForNavigation({waitUntil:"networkidle0"}), waitPromise]);
+    return combPromise;
 }).then(function(){
     console.log("Login done");
+    let startPrepClickPromise = cPage.click("a[data-analytics='StartPreparation']");
+    return startPrepClickPromise;
+}).then(function(){
+    // questions page
+    console.log("q");
 }).catch(function(err){
     console.log("err " , err);
 })
+console.log("after");
